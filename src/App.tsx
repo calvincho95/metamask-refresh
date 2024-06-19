@@ -1,22 +1,42 @@
 import { Button, Flex, Text } from "@chakra-ui/react";
 import { ethers } from "ethers";
 import { JsonRpcSigner } from "ethers";
-import { FC, useState } from "react";
+import { FC, useEffect, useState } from "react";
 
 const App: FC = () => {
   const [signer, setSigner] = useState<JsonRpcSigner | null>(null);
 
+  const getSigner = async () => {
+    if (!window.ethereum) return;
+
+    const provider = new ethers.BrowserProvider(window.ethereum);
+
+    setSigner(await provider.getSigner());
+  };
+
   const onClickMetamask = async () => {
     try {
-      if (!window.ethereum) return;
+      getSigner();
 
-      const provider = new ethers.BrowserProvider(window.ethereum);
-
-      setSigner(await provider.getSigner());
+      localStorage.setItem("isLogin", "true");
     } catch (error) {
       console.error(error);
     }
   };
+
+  const onClickLogout = () => {
+    setSigner(null);
+
+    localStorage.removeItem("isLogin");
+  };
+
+  useEffect(() => {
+    const localIsLogin = localStorage.getItem("isLogin");
+
+    if (localIsLogin === "true") {
+      getSigner();
+    }
+  }, []);
 
   return (
     <Flex
@@ -28,7 +48,10 @@ const App: FC = () => {
       flexDir="column"
     >
       {signer ? (
-        <Text>{signer.address}</Text>
+        <>
+          <Text>{signer.address}</Text>
+          <Button onClick={onClickLogout}>로그아웃</Button>
+        </>
       ) : (
         <Button onClick={onClickMetamask}>🦊 로그인</Button>
       )}

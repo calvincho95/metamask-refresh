@@ -24,6 +24,12 @@ const App: FC = () => {
     }
   };
 
+  const onClickLogout = () => {
+    setSigner(null);
+
+    localStorage.removeItem("isLogin");
+  };
+
   useEffect(() => {
     const localIsLogin = localStorage.getItem("isLogin");
 
@@ -42,7 +48,10 @@ const App: FC = () => {
       flexDir="column"
     >
       {signer ? (
-        <Text>{signer.address}</Text>
+        <>
+          <Text>{signer.address}</Text>
+          <Button onClick={onClickLogout}>로그아웃</Button>
+        </>
       ) : (
         <Button onClick={onClickMetamask}>🦊 로그인</Button>
       )}
